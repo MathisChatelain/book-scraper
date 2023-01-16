@@ -50,5 +50,4 @@ with open('../Chatelain_Mathis_2_data_images_012023/phase_1_data.csv', 'w') as f
         review_rating,
         image_url
         ]
-    print(ligne)
     writer.writerow(ligne)
