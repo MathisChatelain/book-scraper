@@ -45,36 +45,43 @@ def scrape_book(book_url, csv_path):
         # we use our dict keys as headers and our values as data and initialise headers if the csv is empty
         writer.writerow(data.values())
 
-
-category = "historical-fiction_4"
-# By default this website use index.html as a page name and then uses page-N.html
-page = "index.html"
-base_url = "http://books.toscrape.com/catalogue/category/books/"
-url = base_url + category + "/" + page
-page = requests.get(url)
-soup = BeautifulSoup(page.content, 'html.parser')
-phase_2_csv_path = '../Chatelain_Mathis_2_data_images_012023/phase_2_data.csv'
-catalogue_url = "https://books.toscrape.com/catalogue/"
-
-write_csv_headers(phase_2_csv_path)
-
-number_of_books = int(soup.find("form",{"class":"form-horizontal"}).findChildren("strong")[0].string)
-number_of_pages = int(number_of_books / 20) + 1
-if number_of_books <= 20:
-    pages = ["index.html"]
-else:
-    pages = []
-    for i in range(number_of_pages):
-        pages.append("page-" + str(i+1) + ".html")
-
-for page in pages:
+def fetch_category(category):
+    # By default this website use index.html as a page name and then uses page-N.html
+    page = "index.html"
     base_url = "http://books.toscrape.com/catalogue/category/books/"
     url = base_url + category + "/" + page
     page = requests.get(url)
     soup = BeautifulSoup(page.content, 'html.parser')
+    catalogue_url = "https://books.toscrape.com/catalogue/"
+    csv_path = "./" + category
 
-    books = soup.findAll("article", {"class":"product_pod"})
-    for book in books:
-        book_ref = book.findChildren("h3")[0].findChildren("a")[0]["href"][9:]
-        book_url = catalogue_url + book_ref
-        scrape_book(book_url, phase_2_csv_path)
+    write_csv_headers(csv_path)
+
+    number_of_books = int(soup.find("form",{"class":"form-horizontal"}).findChildren("strong")[0].string)
+    number_of_pages = int(number_of_books / 20) + 1
+    if number_of_books <= 20:
+        pages = ["index.html"]
+    else:
+        pages = []
+        for i in range(number_of_pages):
+            pages.append("page-" + str(i+1) + ".html")
+
+    for page in pages:
+        base_url = "http://books.toscrape.com/catalogue/category/books/"
+        url = base_url + category + "/" + page
+        page = requests.get(url)
+        soup = BeautifulSoup(page.content, 'html.parser')
+
+        books = soup.findAll("article", {"class":"product_pod"})
+        for book in books:
+            book_ref = book.findChildren("h3")[0].findChildren("a")[0]["href"][9:]
+            book_url = catalogue_url + book_ref
+            scrape_book(book_url, csv_path)
+
+
+url = "http://books.toscrape.com"
+page = requests.get(url)
+soup = BeautifulSoup(page.content, 'html.parser')
+categories = soup.find("div", {"class":"side_categories"}).findChild("ul").findChildren("a")
+for category in categories:
+    fetch_category(category["href"].split("/")[3].split("_")[0])
