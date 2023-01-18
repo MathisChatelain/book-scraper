@@ -1,5 +1,9 @@
 import requests
 import csv
+
+# shutil is part of python3 base libs
+import shutil
+
 from bs4 import BeautifulSoup
 
 def write_csv_headers(csv_path):
@@ -26,7 +30,6 @@ def scrape_book(book_url, csv_path):
     book_page = requests.get(book_url)
     book_soup = BeautifulSoup(book_page.content, 'html.parser')
 
-    # using dicts here add readability
     data = {
         "product_page_url": book_url,
         "universal_product_code": get_product_data(book_soup, "UPC"),
@@ -39,11 +42,25 @@ def scrape_book(book_url, csv_path):
         "review_rating": book_soup.find("p",{"class":"star-rating"})["class"][1],
         "image_url": "http://books.toscrape.com/" + book_soup.find("div",{"id":"product_gallery"}).findChildren("img")[0]["src"][6:]
     }
-    # changed csv open mode from write to append in phase 2
+
     with open(csv_path, 'a') as fichier_csv:
         writer = csv.writer(fichier_csv, delimiter=',')
-        # we use our dict keys as headers and our values as data and initialise headers if the csv is empty
         writer.writerow(data.values())
+
+def download_book_images(book_url, csv_path):
+    page = requests.get(book_url)
+    soup = BeautifulSoup(page.content, 'html.parser')
+    image_source =  soup.find("div",{"id":"product_gallery"}).findChildren("img")[0]["src"][6:]
+    file_name = image_source.split("/")[-1]
+    image_url = "http://books.toscrape.com/" + image_source
+    res = requests.get(image_url, stream = True)
+    if res.status_code == 200:
+        with open(file_name,'wb') as f:
+            shutil.copyfileobj(res.raw, f)
+        print('Image sucessfully Downloaded: ',file_name)
+    else:
+        print('Image Couldn\'t be retrieved')
+    
 
 def fetch_category(category):
     # By default this website use index.html as a page name and then uses page-N.html
@@ -77,16 +94,19 @@ def fetch_category(category):
             book_ref = book.findChildren("h3")[0].findChildren("a")[0]["href"][9:]
             book_url = catalogue_url + book_ref
             scrape_book(book_url, csv_path)
+            download_book_images(book_url, csv_path)
+
+def fetch_categories():
+    url = "http://books.toscrape.com"
+    page = requests.get(url)
+    soup = BeautifulSoup(page.content, 'html.parser')
+
+    # The first "a" element is the link to base page so we get rid of it with [1:]
+    categories = soup.find("div", {"class":"side_categories"}).findChild("ul").findChildren("a")[1:]
+
+    for category in categories:
+        category_name = category["href"].split("/")[3]
+        fetch_category(category_name)
 
 
-url = "http://books.toscrape.com"
-page = requests.get(url)
-soup = BeautifulSoup(page.content, 'html.parser')
-
-# The first a element is the link to base page so we get rid of it with [1:]
-categories = soup.find("div", {"class":"side_categories"}).findChild("ul").findChildren("a")[1:]
-
-for category in categories:
-    category_name = category["href"].split("/")[3]
-    print(category_name)
-    fetch_category(category_name)
+fetch_categories()
