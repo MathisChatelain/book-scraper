@@ -47,13 +47,13 @@ def scrape_book(book_url, csv_path):
 
 def fetch_category(category):
     # By default this website use index.html as a page name and then uses page-N.html
-    page = "index.html"
+    pagination = "index.html"
     base_url = "http://books.toscrape.com/catalogue/category/books/"
-    url = base_url + category + "/" + page
+    url = base_url + category + "/" + pagination
     page = requests.get(url)
     soup = BeautifulSoup(page.content, 'html.parser')
     catalogue_url = "https://books.toscrape.com/catalogue/"
-    csv_path = "./" + category
+    csv_path = "./data/" + category + ".csv"
 
     write_csv_headers(csv_path)
 
@@ -66,9 +66,9 @@ def fetch_category(category):
         for i in range(number_of_pages):
             pages.append("page-" + str(i+1) + ".html")
 
-    for page in pages:
+    for pagination in pages:
         base_url = "http://books.toscrape.com/catalogue/category/books/"
-        url = base_url + category + "/" + page
+        url = base_url + category + "/" + pagination
         page = requests.get(url)
         soup = BeautifulSoup(page.content, 'html.parser')
 
@@ -82,6 +82,11 @@ def fetch_category(category):
 url = "http://books.toscrape.com"
 page = requests.get(url)
 soup = BeautifulSoup(page.content, 'html.parser')
-categories = soup.find("div", {"class":"side_categories"}).findChild("ul").findChildren("a")
+
+# The first a element is the link to base page so we get rid of it with [1:]
+categories = soup.find("div", {"class":"side_categories"}).findChild("ul").findChildren("a")[1:]
+
 for category in categories:
-    fetch_category(category["href"].split("/")[3].split("_")[0])
+    category_name = category["href"].split("/")[3]
+    print(category_name)
+    fetch_category(category_name)
