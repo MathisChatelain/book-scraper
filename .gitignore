@@ -1,4 +1,5 @@
 data
+errors*
 
 # Basic python gitignore structure
 # Byte-compiled / optimized / DLL files
