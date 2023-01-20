@@ -24,9 +24,9 @@ python3 -m venv /path/to/new/virtual/environment
 
 3. Activation de votre environement:
 
-Veillez à remplacer path/to/env par le chemin d'accés à otre environement:
+    Veillez à remplacer path/to/env par le chemin d'accés à otre environement:
 
-Sous Unix ou MacOS avec bash par défaut: 
+    Sous Unix ou MacOS avec bash par défaut: 
 ```
 source /path/to/venv/bin/activate
 ```

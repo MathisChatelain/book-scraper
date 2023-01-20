@@ -21,7 +21,7 @@ class BookScraper:
         base_url = "http://books.toscrape.com/catalogue/category/books/"
         catalogue_url = "https://books.toscrape.com/catalogue/"
 
-        path = f"./data/{category}/"
+        path = f"./data/{category}/images/"
         csv_path = f"./data/{category}/{category}_data.csv"
         os.makedirs(path)
         self.write_csv_headers(csv_path)
@@ -51,7 +51,7 @@ class BookScraper:
             "review_rating",
             "image_url"
         ]
-        with open(csv_path, 'w') as fichier_csv:
+        with open(csv_path, 'w', encoding="utf-8") as fichier_csv:
             writer = csv.writer(fichier_csv, delimiter=',')
             writer.writerow(headers)
 
@@ -79,7 +79,7 @@ class BookScraper:
             "image_url": f"http://books.toscrape.com/{book_soup.find('div',{'id':'product_gallery'}).findChildren('img')[0]['src'][6:]}"
         }
 
-        with open(csv_path, 'a') as fichier_csv:
+        with open(csv_path, 'a', encoding="utf-8") as fichier_csv:
             writer = csv.writer(fichier_csv, delimiter=',')
             writer.writerow(data.values())
 
