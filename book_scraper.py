@@ -89,7 +89,7 @@ class BookScraper:
                 "price_excluding_tax": self.get_product_data(book_soup, "Price (excl. tax)"),
                 "number_available": self.get_product_data(book_soup, "Availability"),
                 "product_description": book_soup.find("div",{"id":"product_description"}).findNext("p").contents[0],
-                "category": book_soup.find("ul",{"class":"breadcrumba"}).findChildren("a")[2].string,
+                "category": book_soup.find("ul",{"class":"breadcrumb"}).findChildren("a")[2].string,
                 "review_rating": book_soup.find("p",{"class":"star-rating"})["class"][1],
                 "image_url": f"http://books.toscrape.com/{book_soup.find('div',{'id':'product_gallery'}).findChild('img')['src'][6:]}"
             }
