@@ -7,7 +7,6 @@ from bs4 import BeautifulSoup
 
 class BookScraper:
 
-
     def fetch_categories(self):
         soup = BeautifulSoup(requests.get("http://books.toscrape.com").content, 'html.parser')
 
@@ -28,11 +27,11 @@ class BookScraper:
         self.write_csv_headers(csv_path)
 
         category_url = f"{base_url}{category}/index.html"
-        soup = BeautifulSoup(requests.get(category_url).content, 'html.parser')
+        base_soup = BeautifulSoup(requests.get(category_url).content, 'html.parser')
 
-        for pagination in self.get_category_pages(soup):
-            url = f"{base_url}{category}/{pagination}"
-            soup = BeautifulSoup(requests.get(url).content, 'html.parser')
+        for pagination in self.get_category_pages(base_soup):
+            paginated_url = f"{base_url}{category}/{pagination}"
+            soup = BeautifulSoup(requests.get(paginated_url).content, 'html.parser')
 
             for book in soup.findAll("article", {"class":"product_pod"}):
                 book_url = f"{catalogue_url}{book.findChildren('h3')[0].findChildren('a')[0]['href'][9:]}"
@@ -102,9 +101,3 @@ class BookScraper:
             print("Image sucessfully Downloaded: ",file_name)
         else:
             print("Image Couldn't be retrieved")
-
-    
-
-   
-
-    
